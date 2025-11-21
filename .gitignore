@@ -1,0 +1,32 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# VSCode settings
+.vscode/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# PyInstaller / EXE build artifacts
+*.spec
+
+# Logs
+*.log
+
+# Cache
+.cache/
