@@ -1,8 +1,9 @@
 
 from PyQt5.QtCore import QSize, Qt, QTimer
-from PyQt5.QtWidgets import QMainWindow, QLabel, QToolBar, QAction, QStatusBar, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QLabel, QToolBar, QAction, QStatusBar, QLineEdit, QVBoxLayout, QWidget
 
 from core.responses import*
+from core.assistant import*
 
 # Window Size
 height = 295
@@ -14,7 +15,7 @@ moji_font_size = 30
 
 
 """
-For setting tab
+For setting window
 """
 class SecondaryWindow(QMainWindow):
     def __init__(self):
@@ -39,51 +40,53 @@ class MainWindow(QMainWindow):
         # Title
         self.setWindowTitle("Moji")
 
+        # container widget
+        container = QWidget()
+        self.setCentralWidget(container)
+
+        # Layout
+        layout = QVBoxLayout()
+        container.setLayout(layout)
+
         # Moji 1.0
         self.widget = QLabel(get_face())
-        
         # text font 
         font   = self.widget.font()
         font.setPointSize(moji_font_size)
-        
         # font alignment
         self.widget.setFont(font)
         self.widget.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-        self.setCentralWidget(self.widget)
 
-        # timer for rotating widgets
+
+        # Result Display 
+        self.result_label = QLabel("")
+        self.result_label.setAlignment(Qt.AlignHCenter)
+
+        # Text Input 
+        self.textbox = QLineEdit()
+        self.textbox.returnPressed.connect(self.on_enter_pressed)
+
+        # Add Widget to Layout
+        layout.addWidget(self.widget)
+        layout.addWidget(self.result_label)
+        layout.addWidget(self.textbox)
+
+        # Timer
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_widget)
-        self.timer.start(1500)   # 1.5s
+        self.timer.start(1500)
 
-        # ToolBar 
+        # Toolbar
         toolbar = QToolBar("Tool Bar")
         self.addToolBar(toolbar)
-
-        # Secondary window button
-        toolbar_button_action = QAction("Talk To Me!",self)
-        #toolbar_button_action.setStatusTip("Yes")
-        toolbar_button_action.triggered.connect(self.toolbar_button_clicked)
-        toolbar_button_action.setCheckable(True)
-        toolbar.addAction(toolbar_button_action)
+        action = QAction("Setting", self)
+        action.triggered.connect(self.toolbar_button_clicked)
+        toolbar.addAction(action)
 
         self.setStatusBar(QStatusBar(self))
 
+        self.setFixedSize(QSize(height, width))
 
-        # Text Box
-        self.textbox = QLineEdit(self)
-
-        # user text input   
-        self.textbox.returnPressed.connect(self.on_enter_pressed)
-
-        # textbox location
-        self.textbox.move(0,258)
-        self.textbox.resize(280,40)
-        
-        
-
-        # window fixed size
-        self.setFixedSize(QSize(height,width))
 
 
     """
@@ -97,13 +100,21 @@ class MainWindow(QMainWindow):
     Taking user input from the textbox
     """
     def on_enter_pressed(self):
-        text = self.textbox.text()
-        print(text)
+        text = self.textbox.text().strip()
+        #print(text)
+
+        if text.startswith("/"):
+            result = handle_commad(text)
+        
+        else:
+            result = handle_chat(text)
+
+        self.result_label.setText(result)
         self.textbox.clear()
 
 
     """
-    used for randomly selecting widgets
+    Function for randomly selecting widgets
     """
     def update_widget(self):
         pick_random_mood()       # change mood each tick
